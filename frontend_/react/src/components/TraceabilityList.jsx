@@ -1,4 +1,3 @@
-// components/TraceabilityList.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getLatestProductEvents } from "../utils/rpcClient";
@@ -19,19 +18,31 @@ export default function TraceabilityList({ onSelect, searchTerm }) {
       const latest = await getLatestProductEvents();
       setEvents(latest);
     };
-  
-    fetchEvents(); // Llamada inicial
-    const interval = setInterval(fetchEvents, 15000); // Auto-update cada 15s
-  
+
+    fetchEvents();
+    const interval = setInterval(fetchEvents, 15000);
     return () => clearInterval(interval);
   }, []);
-  
+
+  const normalizedTerm = searchTerm.trim().toLowerCase();
+
+  const showAll =
+    normalizedTerm === "" ||
+    ["p", "pr", "pro", "prod", "prod-", "0"].includes(normalizedTerm) ||
+    normalizedTerm.startsWith("0x");
 
   const filtered = events
     .filter((item) => item.id !== 0)
-    .filter((item) =>
-      item.id.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    .filter((item) => {
+      if (showAll) return true;
+
+      const productId = `prod-${item.id}`.toLowerCase();
+      return (
+        productId.includes(normalizedTerm) ||
+        item.id.toString().includes(normalizedTerm) ||
+        item.txHash.toLowerCase().includes(normalizedTerm)
+      );
+    });
 
   if (filtered.length === 0) {
     return <p className="text-gray-400">No se encontraron productos</p>;
@@ -45,7 +56,7 @@ export default function TraceabilityList({ onSelect, searchTerm }) {
           onClick={() => onSelect(`PROD-${item.id}`)}
           className="group bg-[#0d1117] border border-[#30363d] rounded-xl p-4 cursor-pointer hover:bg-[#21262d] hover:shadow-md hover:scale-[1.01] transition-all relative"
         >
-          {/* Badge de bloque (esquina inferior derecha) */}
+          {/* Badge de bloque */}
           <span
             onClick={(e) => {
               e.stopPropagation();
@@ -58,7 +69,10 @@ export default function TraceabilityList({ onSelect, searchTerm }) {
 
           {/* Hash */}
           <div className="flex items-center gap-3 mb-2">
-            <Compass className="text-blue-400 group-hover:scale-110 transition-transform duration-200" size={20} />
+            <Compass
+              className="text-blue-400 group-hover:scale-110 transition-transform duration-200"
+              size={20}
+            />
             <span
               onClick={(e) => {
                 e.stopPropagation();

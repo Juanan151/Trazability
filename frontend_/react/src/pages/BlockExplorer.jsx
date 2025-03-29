@@ -55,7 +55,8 @@ export default function BlockExplorer() {
   };
 
   return (
-    <MainLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+    <MainLayout >
+      <h1 className="text-3xl font-bold text-white mb-6">Explorador de Bloques</h1>
       <div className="w-full bg-[#0d1117] rounded-xl border border-[#30363d] overflow-hidden">
         {/* Encabezado */}
         <div className="grid grid-cols-12 bg-[#161b22] text-white px-6 py-3 font-semibold border-b border-[#30363d]">

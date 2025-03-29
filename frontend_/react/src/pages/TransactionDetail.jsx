@@ -1,6 +1,5 @@
-// pages/TransactionDetail.jsx
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   ClipboardCopy,
   Check,
@@ -12,6 +11,7 @@ import {
   ArrowUpRight,
   Layers,
   Flame,
+  FileText,
 } from "lucide-react";
 import { getTransactionByHash } from "../utils/rpcClient";
 import MainLayout from "../components/MainLayout";
@@ -22,15 +22,29 @@ export default function TransactionDetail() {
   const [tx, setTx] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState("transactions");
 
   useEffect(() => {
     getTransactionByHash(hash).then((res) => {
-      setTx(res);
       console.log(res);
+      setTx(res);
       setLoading(false);
     });
   }, [hash]);
+
+  const hexToInt = (hex) => parseInt(hex || "0x0", 16);
+
+  const decodeInput = (hex) => {
+    try {
+      if (!hex || hex === "0x") return null;
+      const raw = hex.startsWith("0x") ? hex.slice(2) : hex;
+      const buffer = new Uint8Array(raw.match(/.{1,2}/g).map((b) => parseInt(b, 16)));
+      const decoded = new TextDecoder().decode(buffer).replace(/\0/g, "");
+      console.log(decoded);
+      return decoded.split("$")[1] || "(Formato desconocido)";
+    } catch {
+      return "(No legible)";
+    }
+  };
 
   const handleCopy = () => {
     if (!tx?.hash) return;
@@ -59,109 +73,98 @@ export default function TransactionDetail() {
     );
   }
 
-  // Conversión segura de campos hexadecimales
-  const hexToInt = (hex) => parseInt(hex || "0x0", 16);
-  const formatWei = (wei) => `${hexToInt(wei)} wei`;
+  const wei = hexToInt(tx.value);
+  const gasPrice = hexToInt(tx.gasPrice);
+  const gas = hexToInt(tx.gas);
+  const eth = (wei / 1e18).toFixed(6);
+  const gwei = (gasPrice / 1e9).toFixed(2);
+  const blockNumber = hexToInt(tx.blockNumber);
 
   return (
-    <MainLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Layers size={26} className="text-blue-400" />
-          Transacción
-        </h1>
+    <MainLayout >
+      <h1 className="text-3xl font-bold text-white mb-6">Detalles de la Transacción</h1>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <button
           onClick={() => navigate(-1)}
-          className="bg-gray-100 text-black font-semibold px-4 py-1.5 rounded-md hover:bg-white transition"
+          className="bg-gray-100 text-black font-semibold px-4 py-2 rounded-md hover:bg-white transition"
         >
-          <ArrowLeft size={16} className="inline mr-1" /> Volver
+          <ArrowLeft size={16} className="inline mr-1" />
+          Volver
         </button>
       </div>
 
       {/* Hash principal */}
-      <div className="bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-6">
+      <div className="bg-[#0d1117] border border-[#30363d] rounded-lg px-5 py-4 flex justify-between items-center mb-6 shadow">
         <div>
-          <p className="text-sm text-gray-400">Hash</p>
-          <p className="font-mono truncate text-white">{tx.hash}</p>
-          <p className="text-green-400 text-sm mt-1">Sucess</p>
+          <p className="text-sm text-gray-400 mb-1">Hash</p>
+          <p className="text-white font-mono text-sm break-all">{tx.hash}</p>
+          <span className="text-green-400 text-xs mt-1 inline-block">✔ Confirmada</span>
         </div>
         <button
           onClick={handleCopy}
           className="bg-gray-100 text-black p-2 rounded-md hover:bg-white transition"
+          title="Copiar hash"
         >
           {copied ? <Check size={18} /> : <ClipboardCopy size={18} />}
         </button>
       </div>
 
-      {/* Info general */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+      {/* Grid de datos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <Card
-          icon={<Layers size={18} />}
+          icon={<Layers />}
           label="Bloque"
-          value={parseInt(tx.blockNumber, 16)}
-        />
-        <Card
-          icon={<Flame size={18} />}
-          label="Gas usado"
-          value={parseInt(tx.gas, 16)}
-        />
-        <Card
-          icon={<Cpu size={18} />}
-          label="Nonce"
-          value={parseInt(tx.nonce, 16)}
-        />
-        <Card
-          icon={<Info size={18} />}
-          label="Llamada a contrato"
-          value={tx.input && tx.input !== "0x" ? "Sí" : "No"}
-        />
-        <Card
-          icon={<DollarSign size={18} />}
-          label="Valor"
           value={
-            <div className="flex items-center gap-2">
-              <span>{parseInt(tx.value, 16)} wei</span>
-              <span className="text-gray-400 text-sm">
-                ({(parseInt(tx.value, 16) / 1e18).toFixed(6)} ETH)
-              </span>
-            </div>
+            <Link
+              to={`/block/${blockNumber}`}
+              className="text-blue-400 hover:underline"
+            >
+              #{blockNumber}
+            </Link>
           }
         />
-
-        <Card
-          icon={<DollarSign size={18} />}
-          label="Gas Price"
-          value={
-            <div className="flex items-center gap-2">
-              <span>{parseInt(tx.gasPrice, 16)} wei</span>
-              <span className="text-gray-400 text-sm">
-                ({(parseInt(tx.gasPrice, 16) / 1e9).toFixed(2)} Gwei)
-              </span>
-            </div>
-          }
-        />
+        <Card icon={<Flame />} label="Gas usado" value={`${gas} wei`} />
+        <Card icon={<DollarSign />} label="Valor" value={`${wei} wei (${eth} ETH)`} />
+        <Card icon={<DollarSign />} label="Gas Price" value={`${gasPrice} wei (${gwei} Gwei)`} />
+        <Card icon={<Cpu />} label="Nonce" value={hexToInt(tx.nonce)} />
+        <Card icon={<Info />} label="Llamada a contrato" value={tx.input && tx.input !== "0x" ? "Sí" : "No"} />
       </div>
 
-      {/* Desde / Hacia */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-        <Card
-          icon={<ArrowUpRight size={18} />}
-          label="Desde"
-          value={<code>{tx.from}</code>}
-        />
-        <Card
-          icon={<ArrowDownRight size={18} />}
-          label="Hacia"
-          value={<code>{tx.to || "—"}</code>}
-        />
+      {/* Direcciones */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <Card icon={<ArrowUpRight />} label="Desde" value={<code>{tx.from}</code>} />
+        <Card icon={<ArrowDownRight />} label="Hacia" value={<code>{tx.to || "—"}</code>} />
       </div>
+
+      {/* Datos crudos */}
+      {tx.input && tx.input !== "0x" && (
+        <div className="bg-[#0d1117] border border-[#30363d] rounded-lg p-5 shadow">
+          <h2 className="flex items-center gap-2 text-white font-semibold mb-3">
+            <FileText size={18} className="text-yellow-400" />
+            Datos adicionales (input)
+          </h2>
+          <div className="mb-3">
+            <p className="text-sm text-gray-400 mb-1">Hex</p>
+            <code className="block bg-[#161b22] p-3 rounded text-sm text-white overflow-x-auto">
+              {tx.input}
+            </code>
+          </div>
+          <div>
+            <p className="text-sm text-gray-400 mb-1">Decodificado</p>
+            <code className="block bg-[#161b22] p-3 rounded text-sm text-white overflow-x-auto">
+              {decodeInput(tx.input)}
+            </code>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 }
 
 function Card({ icon, label, value }) {
   return (
-    <div className="bg-[#0d1117] border border-[#30363d] rounded-lg p-4">
+    <div className="bg-[#0d1117] border border-[#30363d] rounded-lg p-4 hover:shadow-md transition">
       <div className="flex items-center gap-2 mb-1 text-gray-400 text-sm">
         {icon} {label}
       </div>

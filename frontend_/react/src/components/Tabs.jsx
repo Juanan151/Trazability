@@ -1,10 +1,26 @@
-// components/Tabs.jsx
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useMatch } from "react-router-dom";
+import { Route, Box, Repeat } from "lucide-react";
 
 export default function Tabs() {
   const navigate = useNavigate();
-  const location = useLocation();
+  
+  // Usamos useMatch para comprobar si estamos en la ruta correspondiente
+  const matchTraceability = useMatch("/");
+  const matchBlocks = useMatch("/blocks");
+  const matchTransactions = useMatch("/transactions");
+  const matchProduct = useMatch("/product/:id");
+  const matchTxHash = useMatch("/tx/:hash");
+
+  // Determinamos el tab activo según las rutas
+  const getActiveTab = () => {
+    if (matchBlocks) return "blocks"; // Si estamos en la ruta de Blocks
+    if (matchTransactions || matchTxHash) return "txs"; // Si estamos en transacciones o con hash
+    if (matchProduct) return "traceability"; // Si estamos en la página de producto
+    return "traceability"; // Página principal
+  };
+
+  const activeTab = getActiveTab();
 
   const tabs = [
     {
@@ -12,34 +28,37 @@ export default function Tabs() {
       path: "/",
       icon: (
         <span className="group-hover:rotate-[25deg] group-hover:scale-130 transition-transform duration-500 ease-out">
-          📍
+          <Route size={18} />
         </span>
       ),
+      value: "traceability",
     },
     {
       label: "Blocks",
       path: "/blocks",
       icon: (
         <span className="group-hover:rotate-[25deg] group-hover:scale-130 transition-transform duration-500 ease-out">
-          🧱
+          <Box size={18} />
         </span>
       ),
+      value: "blocks",
     },
     {
       label: "TXs",
       path: "/transactions",
       icon: (
         <span className="text-green-400 group-hover:rotate-[25deg] group-hover:scale-130 transition-transform duration-500 ease-out">
-          💱
+          <Repeat size={18} />
         </span>
       ),
+      value: "txs",
     },
   ];
 
   return (
     <div className="flex justify-center space-x-4">
       {tabs.map((tab) => {
-        const isActive = location.pathname === tab.path;
+        const isActive = activeTab === tab.value;
         return (
           <button
             key={tab.path}

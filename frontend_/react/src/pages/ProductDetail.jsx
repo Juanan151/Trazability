@@ -1,103 +1,181 @@
+// pages/ProductDetail.jsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getAllEventsByProductId } from "../utils/rpcClient";
 import MainLayout from "../components/MainLayout";
 import MapView from "../components/MapView";
+import {
+  MapPin,
+  Globe,
+  GaugeCircle,
+  Mountain,
+  SatelliteDish,
+  Link as LinkIcon,
+  ArrowLeft,
+  Repeat
+} from "lucide-react";
+
 import {
   LineChart,
   Line,
   XAxis,
   YAxis,
+  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  CartesianGrid,
 } from "recharts";
 
 export default function ProductDetail() {
-  const { id } = useParams(); // Esperamos "PROD-1"
-  const realId = id?.split("-")[1]; // Extrae el número: "1"
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const numericId = parseInt(id?.replace("PROD-", ""));
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    if (!realId) return;
-    getAllEventsByProductId(realId).then(setEvents);
-  }, [realId]);
+    if (!isNaN(numericId)) {
+      getAllEventsByProductId(numericId).then(setEvents);
+    }
+  }, [numericId]);
 
-  const calcAvg = (key) => {
-    const total = events.reduce((acc, e) => acc + (e[key] || 0), 0);
-    return events.length ? (total / events.length).toFixed(2) : "–";
+  const metrics = {
+    avgSpeed: average(events.map((e) => e.speed)),
+    avgSatellites: average(events.map((e) => e.satellites)),
   };
 
   return (
-    <MainLayout activeTab="traceability" setActiveTab={() => {}}>
-      <h1 className="text-2xl font-bold text-white mb-4">Detalle de Producto: {id}</h1>
-
-      {/* Panel de estadísticas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatBox title="Velocidad media" value={`${calcAvg("speed")} km/h`} />
-        <StatBox title="Altitud media" value={`${calcAvg("altitude")} m`} />
-        <StatBox title="Satélites promedio" value={`${calcAvg("satellites")}`} />
-        <StatBox title="Puntos registrados" value={events.length} />
+    <MainLayout  >
+      <h1 className="text-3xl font-bold text-white mb-6">Detalles del Producto</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-3xl font-bold text-white">
+          <span className="text-blue-400">PROD-{numericId}</span>
+        </h1>
+        <button
+          onClick={() => navigate(-1)}
+          className="bg-gray-100 text-black font-semibold px-4 py-1.5 rounded-md hover:bg-white transition"
+        >
+          <ArrowLeft size={16} className="inline mr-1" /> Volver
+        </button>
       </div>
 
-      {/* Gráficas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <MetricChart data={events} dataKey="speed" label="Velocidad (km/h)" color="#3b82f6" />
-        <MetricChart data={events} dataKey="altitude" label="Altitud (m)" color="#f59e0b" />
-        <MetricChart data={events} dataKey="satellites" label="Satélites" color="#10b981" />
-        <MetricChart data={events} dataKey="latitude" label="Latitud" color="#9333ea" />
+      {/* Layout principal */}
+      <div className="flex flex-col lg:flex-row gap-6 mb-6">
+        {/* Mapa */}
+        <div className="w-full lg:w-1/2 h-[400px] bg-[#161b22] rounded-xl border border-[#30363d] overflow-hidden">
+          <MapView events={events} />
+        </div>
+
+        {/* Métricas + Gráfico */}
+        <div className="w-full lg:w-1/2 flex flex-col gap-6">
+          {/* Métricas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <MetricCard
+              label="Velocidad media"
+              value={`${metrics.avgSpeed.toFixed(1)} km/h`}
+            />
+            <MetricCard
+              label="Satélites promedio"
+              value={`${metrics.avgSatellites.toFixed(1)}`}
+            />
+          </div>
+
+          {/* Gráfica */}
+          <div className="bg-[#0d1117] border border-[#30363d] rounded-xl p-4">
+            <h2 className="text-lg font-semibold mb-4 text-white">
+              Evolución velocidad
+            </h2>
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={events.map((e, i) => ({ ...e, index: i + 1 }))}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+                <XAxis dataKey="index" stroke="#cbd5e0" />
+                <YAxis stroke="#cbd5e0" />
+                <Tooltip
+                  contentStyle={{ background: "#1a202c", border: "none" }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="speed"
+                  stroke="#3b82f6"
+                  name="Velocidad"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
-      {/* Mapa */}
-      <div className="h-[400px] w-full mb-8">
-        <MapView events={events} />
-      </div>
+      {/* Lista de eventos */}
+      <div className="mt-10">
+        <h2 className="text-lg font-semibold mb-4 text-white">
+          Eventos GPS registrados
+        </h2>
 
-      {/* Timeline de eventos */}
-      <div className="bg-[#0d1117] border border-[#30363d] rounded-lg p-4">
-        <h2 className="text-xl font-semibold text-white mb-4">Historial de ubicaciones</h2>
-        <ul className="space-y-4">
+        <div className="space-y-4">
           {events.map((e, i) => (
-            <li key={i} className="border-l-4 border-blue-500 pl-4 relative">
-              <div className="text-white font-mono text-sm">
-                <span className="font-semibold text-blue-400">Punto #{i + 1}</span> —{" "}
-                Lat: {e.latitude}, Lng: {e.longitude}
+            <div
+              key={i}
+              className="bg-[#0d1117] border border-[#30363d] rounded-xl p-5 text-white shadow hover:shadow-lg transition"
+            >
+              <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center gap-2 text-blue-400 text-sm font-semibold">
+                  <MapPin size={20} />
+                  Punto {i + 1}
+                </div>
+                {i === events.length - 1 && (
+                  <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full">
+                    Último
+                  </span>
+                )}
               </div>
-              <div className="text-gray-400 text-sm">
-                Alt: {e.altitude} m • Vel: {e.speed} km/h • Sats: {e.satellites}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm text-gray-300">
+                <div className="flex items-center gap-2">
+                  <Globe size={14} className="text-teal-400" />
+                  <span>
+                    {e.latitude.toFixed(4)}, {e.longitude.toFixed(4)}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Mountain size={14} className="text-orange-400" />
+                  <span>Altitud: {e.altitude} m</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <GaugeCircle size={14} className="text-pink-400" />
+                  <span>Velocidad: {e.speed} km/h</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <SatelliteDish size={14} className="text-yellow-400" />
+                  <span>Satélites: {e.satellites}</span>
+                </div>
               </div>
-            </li>
+
+              <div className="mt-3 flex items-center gap-2 text-sm text-blue-400 hover:underline">
+                <Repeat size={14} />
+                <a href={`/tx/${e.txHash}`} className="truncate">
+                  {e.txHash}
+                </a>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </MainLayout>
   );
 }
 
-function StatBox({ title, value }) {
+function MetricCard({ label, value }) {
   return (
-    <div className="bg-[#0d1117] border border-[#30363d] p-4 rounded-lg text-center">
-      <p className="text-gray-400 text-sm">{title}</p>
-      <p className="text-xl text-white font-bold">{value}</p>
+    <div className="bg-[#0d1117] border border-[#30363d] rounded-xl p-4 text-center">
+      <p className="text-sm text-gray-400">{label}</p>
+      <p className="text-xl font-semibold text-white mt-1">{value}</p>
     </div>
   );
 }
 
-function MetricChart({ data, dataKey, label, color }) {
-  return (
-    <div className="bg-[#0d1117] border border-[#30363d] p-4 rounded-lg">
-      <p className="text-white font-semibold mb-2">{label}</p>
-      <ResponsiveContainer width="100%" height={200}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#30363d" />
-          <XAxis dataKey={(d, i) => i + 1} tick={{ fill: "#ccc", fontSize: 12 }} />
-          <YAxis tick={{ fill: "#ccc", fontSize: 12 }} />
-          <Tooltip
-            contentStyle={{ background: "#161b22", borderColor: "#30363d", color: "white" }}
-          />
-          <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
+function average(arr) {
+  if (!arr.length) return 0;
+  const sum = arr.reduce((acc, n) => acc + n, 0);
+  return sum / arr.length;
 }
