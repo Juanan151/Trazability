@@ -11,10 +11,11 @@ export default function Tabs() {
   const matchTransactions = useMatch("/transactions");
   const matchProduct = useMatch("/product/:id");
   const matchTxHash = useMatch("/tx/:hash");
+  const matchBlockHash = useMatch("/block/:blockNumber");
 
   // Determinamos el tab activo según las rutas
   const getActiveTab = () => {
-    if (matchBlocks) return "blocks"; // Si estamos en la ruta de Blocks
+    if (matchBlocks || matchBlockHash) return "blocks"; // Si estamos en la ruta de Blocks
     if (matchTransactions || matchTxHash) return "txs"; // Si estamos en transacciones o con hash
     if (matchProduct) return "traceability"; // Si estamos en la página de producto
     return "traceability"; // Página principal
@@ -47,7 +48,7 @@ export default function Tabs() {
       label: "TXs",
       path: "/transactions",
       icon: (
-        <span className="text-green-400 group-hover:rotate-[25deg] group-hover:scale-130 transition-transform duration-500 ease-out">
+        <span className=" group-hover:rotate-[25deg] group-hover:scale-130 transition-transform duration-500 ease-out">
           <Repeat size={18} />
         </span>
       ),

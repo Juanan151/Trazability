@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { getTransactionByHash } from "../utils/rpcClient";
 import MainLayout from "../components/MainLayout";
+import CopyButton from "../components/CopyButton";
 
 export default function TransactionDetail() {
   const { hash } = useParams();
@@ -25,7 +26,6 @@ export default function TransactionDetail() {
 
   useEffect(() => {
     getTransactionByHash(hash).then((res) => {
-      console.log(res);
       setTx(res);
       setLoading(false);
     });
@@ -39,7 +39,6 @@ export default function TransactionDetail() {
       const raw = hex.startsWith("0x") ? hex.slice(2) : hex;
       const buffer = new Uint8Array(raw.match(/.{1,2}/g).map((b) => parseInt(b, 16)));
       const decoded = new TextDecoder().decode(buffer).replace(/\0/g, "");
-      console.log(decoded);
       return decoded.split("$")[1] || "(Formato desconocido)";
     } catch {
       return "(No legible)";
@@ -101,13 +100,7 @@ export default function TransactionDetail() {
           <p className="text-white font-mono text-sm break-all">{tx.hash}</p>
           <span className="text-green-400 text-xs mt-1 inline-block">✔ Confirmada</span>
         </div>
-        <button
-          onClick={handleCopy}
-          className="bg-gray-100 text-black p-2 rounded-md hover:bg-white transition"
-          title="Copiar hash"
-        >
-          {copied ? <Check size={18} /> : <ClipboardCopy size={18} />}
-        </button>
+        <CopyButton textToCopy={tx.hash} />
       </div>
 
       {/* Grid de datos */}
@@ -134,7 +127,7 @@ export default function TransactionDetail() {
       {/* Direcciones */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Card icon={<ArrowUpRight />} label="Desde" value={<code>{tx.from}</code>} />
-        <Card icon={<ArrowDownRight />} label="Hacia" value={<code>{tx.to || "—"}</code>} />
+        <Card icon={<ArrowDownRight />} label="Hacia" value={<code>{tx.to || "CREACIÓN DE CONTRATO"}</code>} />
       </div>
 
       {/* Datos crudos */}
@@ -142,7 +135,7 @@ export default function TransactionDetail() {
         <div className="bg-[#0d1117] border border-[#30363d] rounded-lg p-5 shadow">
           <h2 className="flex items-center gap-2 text-white font-semibold mb-3">
             <FileText size={18} className="text-yellow-400" />
-            Datos adicionales (input)
+            ExtraData
           </h2>
           <div className="mb-3">
             <p className="text-sm text-gray-400 mb-1">Hex</p>

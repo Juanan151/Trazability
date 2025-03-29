@@ -6,6 +6,7 @@ import TransactionDetail from "./pages/TransactionDetail";
 import BlockExplorer from "./pages/BlockExplorer";
 import ProductDetail from "./pages/ProductDetail";
 import TransactionExplorer from "./pages/TransactionExplorer";
+import BlockDetail from "./pages/BlockDetail";
 
 export default function App() {
   return (
@@ -16,7 +17,7 @@ export default function App() {
         <Route path="/transactions" element={<TransactionExplorer />} />
         <Route path="/tx/:hash" element={<TransactionDetail />} />
         <Route path="/product/:id" element={<ProductDetail />} />
-        {/* futuras páginas: /transactions, /product/:id, etc. */}
+        <Route path="/block/:blockNumber" element={<BlockDetail />} />
       </Routes>
     </Router>
   );

@@ -290,3 +290,27 @@ export async function getBlockByNumber(number) {
     return null;
   }
 }
+
+// Función para obtener un bloque por su hash
+export async function getBlockByHash(hash) {
+  const body = {
+    jsonrpc: "2.0",
+    method: "eth_getBlockByHash",
+    params: [hash, false], // false = no incluir las transacciones
+    id: 1,
+  };
+
+  try {
+    const response = await fetch(RPC_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const json = await response.json();
+    return json.result;
+  } catch (error) {
+    console.error(`Error al obtener el bloque con hash ${hash}:`, error);
+    return null;
+  }
+}

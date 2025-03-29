@@ -8,6 +8,8 @@ import {
   getAllEventsByProductId,
   getDashboardStats,
   getLatestProductEvents,
+  getTransactionByHash,
+  getBlockByHash,
 } from "../utils/rpcClient";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -94,13 +96,21 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     const term = searchTerm.trim();
     if (e.key === "Enter" && term) {
       if (term.startsWith("0x") && term.length === 66) {
-        navigate(`/tx/${term}`);
-      } else if (term.startsWith("0x")) {
-        navigate(`/block/${term}`);
+        // Verificar si es un hash de transacción válido
+        const transaction = await getTransactionByHash(term);
+        if (transaction) {
+          navigate(`/tx/${term}`);
+        } else if (term.startsWith("0x")) {
+          // Verificar si es un hash de bloque válido
+          const block = await getBlockByHash(term);
+          if (block) {
+            navigate(`/block/${term}`);
+          }
+        } 
       } else if (term.toLowerCase().startsWith("prod-")) {
         const number = term.split("-")[1].padStart(1, "0"); // PROD-1 → 001
         navigate(`/product/PROD-${number}`);
@@ -110,11 +120,12 @@ export default function Home() {
       }
     }
   };
-  
 
   return (
     <MainLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-      <h1 className="text-3xl font-bold text-white mb-6">Sistema de Trazabilidad</h1>
+      <h1 className="text-3xl font-bold text-white mb-6">
+        Sistema de Trazabilidad
+      </h1>
 
       {/* Buscador */}
       <div className="flex items-center bg-[#161b22] px-4 py-2 rounded-full border border-[#30363d] shadow-sm hover:shadow-md transition-shadow w-full max-w-3xl mx-auto mb-6">
@@ -142,7 +153,9 @@ export default function Home() {
         </div>
 
         <div className="w-full lg:w-3/10 bg-[#161b22] rounded-xl p-4 border border-[#30363d] overflow-y-auto max-h-[500px]">
-          <h2 className="text-lg font-semibold mb-3">Últimas ubicaciones productos</h2>
+          <h2 className="text-lg font-semibold mb-3">
+            Últimas ubicaciones productos
+          </h2>
           <TraceabilityList
             onSelect={setSelectedProduct}
             searchTerm={searchTerm}

@@ -44,11 +44,14 @@ export default function ProductDetail() {
 
   return (
     <MainLayout  >
-      <h1 className="text-3xl font-bold text-white mb-6">Detalles del Producto</h1>
+      
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-3xl font-bold text-white">
+      <h1 className="text-3xl font-bold text-white mb-6">Detalles del Producto</h1>
+        <h2 className="text-3xl font-bold text-white">
           <span className="text-blue-400">PROD-{numericId}</span>
-        </h1>
+        </h2>
+      </div>
+      <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => navigate(-1)}
           className="bg-gray-100 text-black font-semibold px-4 py-1.5 rounded-md hover:bg-white transition"
