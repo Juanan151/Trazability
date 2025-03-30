@@ -1,7 +1,7 @@
 // utils/rpcClient.js
 
 // Aquí defines la URL de tu nodo privado
-const RPC_URL = "http://100.105.222.96:8545"; // Cambia si tu nodo es remoto
+const RPC_URL = "http://100.105.222.96:8545"; 
 
 // topic0 = keccak256("indexed_id_product_event(int256,string)")
 const TOPIC0_HASH =
