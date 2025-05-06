@@ -1,7 +1,5 @@
 // utils/rpcClient.js
-
-// Aquí defines la URL de tu nodo privado
-const RPC_URL = "http://100.105.222.96:8545"; 
+const RPC_URL = "http://localhost:8545"; // Cambia esto a la URL de tu nodo Ethereum
 
 // topic0 = keccak256("indexed_id_product_event(int256,string)")
 const TOPIC0_HASH =

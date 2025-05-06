@@ -13,7 +13,7 @@ export default function MainLayout({ children }) {
             <img
               src="/logo.jpg"
               alt="TBI Logo"
-              className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className="rounded-xl border border-[#30363d] h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
             />
           </Link>
 

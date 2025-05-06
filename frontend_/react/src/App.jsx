@@ -7,12 +7,13 @@ import BlockExplorer from "./pages/BlockExplorer";
 import ProductDetail from "./pages/ProductDetail";
 import TransactionExplorer from "./pages/TransactionExplorer";
 import BlockDetail from "./pages/BlockDetail";
+import TraceabilityExplorer from "./pages/TraceabilityExplorer";
 
 export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<TraceabilityExplorer />} />
         <Route path="/blocks" element={<BlockExplorer />} />
         <Route path="/transactions" element={<TransactionExplorer />} />
         <Route path="/tx/:hash" element={<TransactionDetail />} />
