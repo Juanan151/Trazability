@@ -4,7 +4,7 @@ require("@nomicfoundation/hardhat-toolbox");
     solidity: {
       version: "0.8.24",
       settings: {
-        evmVersion: "london" // required for Besu
+        evmVersion: "london"
       },
     },
     networks: {

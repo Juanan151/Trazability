@@ -1,18 +1,17 @@
 const { ethers } = require("hardhat");
-// Función para enviar la transacción al contrato
+
+
 async function main() {
-  // Obtener la cuenta configurada en Hardhat
+
   const [wallet] = await ethers.getSigners();
   console.log("Cuenta usada:", wallet.address);
 
   const id = 0;
   const data = "PRUEBA DE FUNCIONAMIENTO";
 
-  // Dirección del contrato indexed_id_product
   const contractAddress =
     "0x062C4B86dcA6Ed53457cf75F4699651B64CD6478";
 
-  // Obtener la instancia del contrato utilizando el nombre del contrato compilado
   const contract = await ethers.getContractAt(
     "indexed_id_product",
     contractAddress,
@@ -29,7 +28,8 @@ async function main() {
         nonce: await wallet.getNonce(),
         chainId: 1982,
       });
-    console.log("Enviada ✅");
+    console.log("Enviada TX. Hash:", tx.hash);
+
   } catch (error) {
     console.error("Error en TX:", error);
   }
@@ -37,7 +37,7 @@ async function main() {
 }
 
 main()
-  .then(() => console.log("Script en ejecución..."))
+  .then(() => console.log("Script en ejecucion..."))
   .catch((error) => {
     console.error(error);
     process.exit(1);

@@ -14,7 +14,7 @@ async function main() {
     chainId: 1982,
   });
 
-  console.log("Transacción enviada. Hash:", tx.hash);
+  console.log("Transaccion enviada. Hash:", tx.hash);
   const receipt = await tx.wait(1);
   console.log("Confirmada en bloque:", receipt.blockNumber);
 }

@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { PackageCheck, Clock4, Server, Boxes } from "lucide-react";
 
 export default function TraceabilityExplorer() {
-  const [selectedProduct, setSelectedProduct] = useState("PROD-001");
+  const [selectedProduct, setSelectedProduct] = useState("PROD-008");
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("traceability");
   const [dashboardData, setDashboardData] = useState([]);

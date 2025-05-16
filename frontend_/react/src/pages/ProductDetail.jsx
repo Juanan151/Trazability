@@ -7,9 +7,7 @@ import MapView from "../components/MapView";
 import {
   MapPin,
   Globe,
-  GaugeCircle,
-  Mountain,
-  SatelliteDish,
+  Thermometer, Droplet, Activity, Clock4,
   Link as LinkIcon,
   ArrowLeft,
   Repeat
@@ -38,15 +36,15 @@ export default function ProductDetail() {
   }, [numericId]);
 
   const metrics = {
-    avgSpeed: average(events.map((e) => e.speed)),
-    avgSatellites: average(events.map((e) => e.satellites)),
-  };
-
+  avgTemperature: average(events.map((e) => e.temperature)),
+  avgHumidity: average(events.map((e) => e.humidity))
+};
   return (
-    <MainLayout  >
-      
+    <MainLayout>
       <div className="flex items-center justify-between mb-4">
-      <h1 className="text-3xl font-bold text-white mb-6">Detalles del Producto</h1>
+        <h1 className="text-3xl font-bold text-white mb-6">
+          Detalles del Producto
+        </h1>
         <h2 className="text-3xl font-bold text-white">
           <span className="text-blue-400">PROD-{numericId}</span>
         </h2>
@@ -61,50 +59,108 @@ export default function ProductDetail() {
       </div>
 
       {/* Layout principal */}
-      <div className="flex flex-col lg:flex-row gap-6 mb-6">
-        {/* Mapa */}
-        <div className="w-full lg:w-1/2 h-[400px] bg-[#161b22] rounded-xl border border-[#30363d] overflow-hidden">
-          <MapView events={events} />
-        </div>
+<div className="flex flex-col lg:flex-row gap-6 mb-6">
+  {/* ──────────── COLUMNA IZQUIERDA ──────────── */}
+  <div className="w-full lg:w-1/2 flex flex-col gap-6">
+    {/* Mapa */}
+    <div className="h-[400px] bg-[#161b22] rounded-xl border border-[#30363d] overflow-hidden">
+      <MapView events={events} />
+    </div>
 
-        {/* Métricas + Gráfico */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-6">
-          {/* Métricas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <MetricCard
-              label="Velocidad media"
-              value={`${metrics.avgSpeed.toFixed(1)} km/h`}
-            />
-            <MetricCard
-              label="Satélites promedio"
-              value={`${metrics.avgSatellites.toFixed(1)}`}
-            />
-          </div>
+    {/* Gráfica MOVIMIENTOS */}
+    <div className="bg-[#0d1117] border border-[#30363d] rounded-xl p-4">
+      <h2 className="text-lg font-semibold mb-4 text-white">
+        Evolución Movimientos
+      </h2>
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={events.map((e, i) => ({ ...e, index: i + 1 }))}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+          <XAxis dataKey="index" stroke="#cbd5e0" />
+          <YAxis stroke="#cbd5e0" />
+          <Tooltip
+            formatter={(v) => [`${v}`, "Movimientos acumulados"]}
+            contentStyle={{ background: "#1a202c", border: "none" }}
+          />
+          <Line
+            type="monotone"
+            dataKey="motionCount"
+            name="Movimientos"
+            stroke="#facc15"
+            strokeWidth={2}
+            dot={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
 
-          {/* Gráfica */}
-          <div className="bg-[#0d1117] border border-[#30363d] rounded-xl p-4">
-            <h2 className="text-lg font-semibold mb-4 text-white">
-              Evolución velocidad
-            </h2>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={events.map((e, i) => ({ ...e, index: i + 1 }))}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                <XAxis dataKey="index" stroke="#cbd5e0" />
-                <YAxis stroke="#cbd5e0" />
-                <Tooltip
-                  contentStyle={{ background: "#1a202c", border: "none" }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="speed"
-                  stroke="#3b82f6"
-                  name="Velocidad"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
+  {/* ──────────── COLUMNA DERECHA ──────────── */}
+  <div className="w-full lg:w-1/2 flex flex-col gap-6">
+    {/* Métricas */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <MetricCard
+        label="Temperatura media"
+        value={`${metrics.avgTemperature.toFixed(1)} °C`}
+      />
+      <MetricCard
+        label="Humedad media"
+        value={`${metrics.avgHumidity.toFixed(1)} %`}
+      />
+    </div>
+
+    {/* Gráfica TEMPERATURA */}
+    <div className="bg-[#0d1117] border border-[#30363d] rounded-xl p-4">
+      <h2 className="text-lg font-semibold mb-4 text-white">
+        Evolución Temperatura
+      </h2>
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={events.map((e, i) => ({ ...e, index: i + 1 }))}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+          <XAxis dataKey="index" stroke="#cbd5e0" />
+          <YAxis stroke="#cbd5e0" />
+          <Tooltip
+            formatter={(v) => [`${v} °C`, "Temperatura"]}
+            contentStyle={{ background: "#1a202c", border: "none" }}
+          />
+          <Line
+            type="monotone"
+            dataKey="temperature"
+            name="Temp (°C)"
+            stroke="#f97316"
+            strokeWidth={2}
+            dot={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+
+    {/* Gráfica HUMEDAD */}
+    <div className="bg-[#0d1117] border border-[#30363d] rounded-xl p-4">
+      <h2 className="text-lg font-semibold mb-4 text-white">
+        Evolución Humedad
+      </h2>
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={events.map((e, i) => ({ ...e, index: i + 1 }))}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+          <XAxis dataKey="index" stroke="#cbd5e0" />
+          <YAxis stroke="#cbd5e0" />
+          <Tooltip
+            formatter={(v) => [`${v} %`, "Humedad"]}
+            contentStyle={{ background: "#1a202c", border: "none" }}
+          />
+          <Line
+            type="monotone"
+            dataKey="humidity"
+            name="Hum (%)"
+            stroke="#3b82f6"
+            strokeWidth={2}
+            dot={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+</div>
 
       {/* Lista de eventos */}
       <div className="mt-10">
@@ -139,18 +195,18 @@ export default function ProductDetail() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Mountain size={14} className="text-orange-400" />
-                  <span>Altitud: {e.altitude} m</span>
+                  <Thermometer size={14} className="text-rose-300" />
+                  <span>Temp: {e.temperature} °C</span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <GaugeCircle size={14} className="text-pink-400" />
-                  <span>Velocidad: {e.speed} km/h</span>
+                  <Droplet size={14} className="text-sky-300" />
+                  <span>Hum: {e.humidity} %</span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <SatelliteDish size={14} className="text-yellow-400" />
-                  <span>Satélites: {e.satellites}</span>
+                  <Activity size={14} className="text-amber-300" />
+                  <span>Mov: {e.motionCount}</span>
                 </div>
               </div>
 

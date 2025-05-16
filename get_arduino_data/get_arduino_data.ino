@@ -14,21 +14,15 @@ void loop() {
   if (GPS.available()) {  // Verifica si hay nuevos datos GPS
     float latitude   = GPS.latitude();
     float longitude  = GPS.longitude();
-    float altitude   = GPS.altitude();
-    float speed      = GPS.speed();
-    int   satellites = GPS.satellites();
 
     // Enviar datos en formato CSV
+    Serial.print(",x,x,");
     Serial.print(latitude, 7);
     Serial.print(",");
     Serial.print(longitude, 7);
     Serial.print(",");
-    Serial.print(altitude);
-    Serial.print(",");
-    Serial.print(speed);
-    Serial.print(",");
-    Serial.println(satellites);
+    Serial.println("x");
     
-    delay(5000); 
+    delay(60000); 
   }
 }

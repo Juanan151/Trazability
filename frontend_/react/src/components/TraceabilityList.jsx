@@ -2,12 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getLatestProductEvents } from "../utils/rpcClient";
 import {
-  Compass,
-  Globe,
-  Gauge,
-  Triangle,
-  Satellite,
+  Compass, Globe, Thermometer, Droplet, Activity, Clock
 } from "lucide-react";
+
 
 export default function TraceabilityList({ onSelect, searchTerm }) {
   const navigate = useNavigate();
@@ -100,22 +97,21 @@ export default function TraceabilityList({ onSelect, searchTerm }) {
 
           {/* Datos GPS */}
           <div className="flex flex-wrap gap-2 text-xs text-gray-400 mt-2">
-            <span className="flex items-center gap-1 group-hover:text-teal-300 transition-colors duration-200">
-              <Globe className="text-teal-300 group-hover:scale-110 transition-transform" size={14} />
-              {item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}
-            </span>
-            <span className="flex items-center gap-1 group-hover:text-pink-300 transition-colors duration-200">
-              <Gauge className="text-pink-300 group-hover:scale-110 transition-transform" size={14} />
-              {item.speed} km/h
-            </span>
-            <span className="flex items-center gap-1 group-hover:text-orange-300 transition-colors duration-200">
-              <Triangle className="text-orange-300 group-hover:scale-110 transition-transform" size={14} />
-              Alt: {item.altitude} m
-            </span>
-            <span className="flex items-center gap-1 group-hover:text-yellow-300 transition-colors duration-200">
-              <Satellite className="text-yellow-300 group-hover:scale-110 transition-transform" size={14} />
-              {item.satellites} sats
-            </span>
+            <span className="flex items-center gap-1 group-hover:text-rose-300 transition-colors">
+  <Thermometer size={14} className="text-rose-300 group-hover:scale-110" />
+  {item.temperature} °C
+</span>
+
+<span className="flex items-center gap-1 group-hover:text-sky-300 transition-colors">
+  <Droplet size={14} className="text-sky-300 group-hover:scale-110" />
+  {item.humidity} %
+</span>
+
+<span className="flex items-center gap-1 group-hover:text-amber-300 transition-colors">
+  <Activity size={14} className="text-amber-300 group-hover:scale-110" />
+  {item.motionCount}
+</span>
+
           </div>
         </div>
       ))}

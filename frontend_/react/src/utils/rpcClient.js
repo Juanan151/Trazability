@@ -5,7 +5,7 @@ const RPC_URL = "http://localhost:8545"; // Cambia esto a la URL de tu nodo Ethe
 const TOPIC0_HASH =
   "0xe5c2cc523913383a6000dbdbb392ecfc2ae01abccbf5c88cefd2eb575a3769cc";
 const CONTRACT_ADDRESS = "0x062C4B86dcA6Ed53457cf75F4699651B64CD6478";
-const FROM_BLOCK = "0x9"; // bloque 9 en hexadecimal
+const FROM_BLOCK = "0x17"; // bloque 9 en hexadecimal
 
 export async function getAllEventsByProductId(productId) {
   const hexId = "0x" + BigInt(productId).toString(16).padStart(64, "0"); // topics[1] codificado
@@ -195,25 +195,24 @@ function parseDataString(hexData) {
       hexData.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
     );
     const decoded = new TextDecoder().decode(buffer).replace(/\0/g, "");
+    const values = decoded.split(",");
 
-    const parts = decoded.split("$");
-    if (parts.length < 2) return {};
-
-    const values = parts[1].split(",");
-    if (values.length !== 5) return {};
+    if (values.length !== 6) return {};
 
     return {
-      latitude: parseFloat(values[0]),
-      longitude: parseFloat(values[1]),
-      altitude: parseFloat(values[2]),
-      speed: parseFloat(values[3]),
-      satellites: parseInt(values[4]),
+      timestamp: parseInt(values[0]),
+      temperature: parseFloat(values[1]),
+      humidity: parseFloat(values[2]),
+      latitude: parseFloat(values[3]),
+      longitude: parseFloat(values[4]),
+      motionCount: parseInt(values[5],10),
     };
   } catch (err) {
     console.error("Error al decodificar data:", err);
     return {};
   }
 }
+
 
 // Función para obtener una transacción por hash
 export async function getTransactionByHash(txHash) {

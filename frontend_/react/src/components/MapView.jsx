@@ -24,7 +24,7 @@ export default function MapView({ events }) {
     const latlngs = [];
 
     events.forEach((e, i) => {
-      const { latitude, longitude, altitude, speed, satellites } = e;
+      const { timestamp, latitude, longitude, temperature, humidity, motionCount } = e;
       const position = [latitude, longitude];
       latlngs.push(position);
 
@@ -38,9 +38,9 @@ export default function MapView({ events }) {
 
       const popupContent = `
         <b>Punto ${i + 1}${isLast ? " (último)" : ""}</b><br>
-        Altitud: ${altitude} m<br>
-        Velocidad: ${speed} km/h<br>
-        Satélites: ${satellites}
+        Temperatura: ${temperature} °C<br>
+        Humedad: ${humidity} %<br>
+        Movimientos detectados: ${motionCount}
         ${isLast ? "<br><span style='color:#ef4444;font-weight:bold;'>Última ubicación registrada</span>" : ""}
       `;
 
@@ -49,7 +49,12 @@ export default function MapView({ events }) {
         .bindPopup(popupContent);
     });
 
-    L.polyline(latlngs, { color: "blue", weight: 3 }).addTo(map);
+      L.polyline(latlngs, {
+  color: "#3b82f6",   // azul tailwind; cámbialo si quieres
+  weight: 4,          // grosor del punto
+  dashArray: "1, 12", // 1 px pintado, 12 px en blanco → puntos separados
+  lineCap: "round",   // extremo redondeado = círculo
+}).addTo(map);
 
     const bounds = L.latLngBounds(latlngs);
     map.fitBounds(bounds, { padding: [20, 20] });
